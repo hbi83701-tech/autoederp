@@ -33,8 +33,8 @@ export function PrintButton({ label = 'Print' }: { label?: string }) {
 }
 
 /** Destructive and money actions ask first (PRD 18.2). */
-export function ConfirmSubmit({ children, message, className = 'btn-danger' }: { children: ReactNode; message: string; className?: string }) {
-  return <button type="submit" className={className} onClick={(e) => { if (!confirm(message)) e.preventDefault(); }}>{children}</button>;
+export function ConfirmSubmit({ children, message, className = 'btn-danger', name, value }: { children: ReactNode; message: string; className?: string; name?: string; value?: string }) {
+  return <button type="submit" name={name} value={value} className={className} onClick={(e) => { if (!confirm(message)) e.preventDefault(); }}>{children}</button>;
 }
 
 export function AutoSubmitSelect({ name, value, options, className = 'input', label }: { name: string; value: string; options: { value: string; label: string }[]; className?: string; label: string }) {
