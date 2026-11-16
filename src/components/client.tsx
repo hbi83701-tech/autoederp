@@ -75,7 +75,7 @@ export function CommandPalette({ pages }: { pages: Hit[] }) {
   const pick = (h: Hit) => { setOpen(false); router.push(h.href); };
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="no-print flex w-full max-w-xs items-center gap-2 rounded-lg border border-line bg-paper px-3 py-1.5 text-left text-sm text-muted hover:bg-white">
+      <button type="button" onClick={() => setOpen(true)} className="no-print flex min-w-0 flex-1 max-w-xs items-center gap-2 rounded-lg border border-line bg-paper px-3 py-1.5 text-left text-sm text-muted hover:bg-white">
         <span className="flex-1 truncate">Search students, staff, receipts…</span><kbd className="hidden rounded border border-line bg-white px-1 text-[10px] sm:inline">Ctrl K</kbd>
       </button>
       {open && (

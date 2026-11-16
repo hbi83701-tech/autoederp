@@ -14,8 +14,12 @@ function parseCol(spec) {
     if (type === 'jsonb') { def = rest.slice(1); rest = ''; }
     else { const i = rest.indexOf('{'); def = i < 0 ? rest.slice(1) : rest.slice(1, i); rest = i < 0 ? '' : rest.slice(i); }
   }
-  if (rest.startsWith('{')) opts = rest.slice(1, -1).split('|');
-  else if (rest) throw new Error('bad col ' + spec);
+  if (rest.startsWith('{')) {
+    const close = rest.indexOf('}');
+    opts = rest.slice(1, close).split('|');
+    const after = rest.slice(close + 1);
+    if (after.startsWith('=')) def = after.slice(1); else if (after) throw new Error('bad col ' + spec);
+  } else if (rest) throw new Error('bad col ' + spec);
   return { key: m[1], type, req: !!m[3], def, opts };
 }
 const titleCase = (s) => s.replace(/_id$/, '').replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());

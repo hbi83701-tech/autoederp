@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="no-print sticky top-0 z-30 flex items-center gap-2 border-b border-line bg-white/95 px-4 py-2 backdrop-blur">
         <div className="lg:hidden" />
         <Suspense><CommandPalette pages={pages} /></Suspense>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           {ctx.isStaff && (
             <form action={setFilter} className="hidden items-center gap-2 sm:flex">
               {!ctx.profile.branch_id && ctx.branches.length > 1 && (
@@ -49,7 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <div className="text-xs font-medium leading-tight">{ctx.name}</div>
             <div className="text-[11px] leading-tight text-muted">{ROLE_LABEL[ctx.role] ?? ctx.role}</div>
           </Link>
-          <form action={signOut}><button className="btn-ghost btn-sm">Sign out</button></form>
+          <form action={signOut} className="hidden sm:block"><button className="btn-ghost btn-sm">Sign out</button></form>
         </div>
       </header>
       {ctx.org.status === 'suspended' && <div className="bg-red-600 px-4 py-2 text-center text-sm text-white">This account is suspended. Please contact AutoED support.</div>}

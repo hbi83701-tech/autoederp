@@ -85,17 +85,20 @@ alter table public.audit_events enable row level security;
 create policy audit_sel on public.audit_events for select to authenticated using (org_id = (select app.org_id()) and (select app.can('audit','read')));
 
 create or replace function app.audit() returns trigger language plpgsql security definer set search_path = '' as $$
+declare j jsonb; o uuid;
 begin
+  j := case when tg_op = 'DELETE' then to_jsonb(old) else to_jsonb(new) end;
+  o := coalesce((j->>'org_id')::uuid, case when tg_table_name = 'organisations' then (j->>'id')::uuid end);
   if tg_op = 'INSERT' then
-    insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, after) values (new.org_id, auth.uid(), app.user_name(), 'created', tg_table_name, new.id::text, to_jsonb(new));
+    insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, after) values (o, auth.uid(), app.user_name(), 'created', tg_table_name, j->>'id', j);
     return new;
   elsif tg_op = 'UPDATE' then
     if to_jsonb(new) is distinct from to_jsonb(old) then
-      insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, before, after) values (new.org_id, auth.uid(), app.user_name(), 'updated', tg_table_name, new.id::text, to_jsonb(old), to_jsonb(new));
+      insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, before, after) values (o, auth.uid(), app.user_name(), 'updated', tg_table_name, j->>'id', to_jsonb(old), j);
     end if;
     return new;
   else
-    insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, before) values (old.org_id, auth.uid(), app.user_name(), 'deleted', tg_table_name, old.id::text, to_jsonb(old));
+    insert into public.audit_events(org_id, actor, actor_name, action, entity, entity_id, before) values (o, auth.uid(), app.user_name(), 'deleted', tg_table_name, j->>'id', j);
     return old;
   end if;
 end $$;
@@ -368,6 +371,8 @@ begin
       if typ = 'jsonb' then def := substr(rest, 2);
       else i := strpos(rest, '{'); def := case when i = 0 then substr(rest, 2) else substr(rest, 2, i - 2) end;
       end if;
+    elsif left(rest, 1) = '{' and strpos(rest, '}=') > 0 then
+      def := substr(rest, strpos(rest, '}=') + 2);   -- options before the default: key{a|b}=a
     end if;
     l := k || ' ' || case typ when 'int' then 'integer' when 'bool' then 'boolean' when 'ts' then 'timestamptz' else typ end || case when req then ' not null' else '' end;
     if def is not null and def <> '' then

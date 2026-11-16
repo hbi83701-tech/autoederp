@@ -2,6 +2,7 @@ import { getCtx, ROLE_LABEL } from '@/lib/ctx';
 import { Page, Card, Field } from '@/components/ui';
 import { go, str } from '@/lib/fmt';
 import { PRODUCT } from '@/lib/nav';
+import { signOut } from '@/lib/actions';
 
 export const metadata = { title: 'My account' };
 async function save(fd: FormData) { 'use server'; const ctx = await getCtx(); const { error } = await ctx.sb.rpc('update_my_profile', { p_name: str(fd, 'name'), p_phone: str(fd, 'phone'), p_language: str(fd, 'language') }); go('/account', error ? error.message : 'Saved.', error ? 'err' : 'ok'); }
@@ -25,6 +26,7 @@ export default async function Account() {
         <Card title="Change password"><form action={password} className="space-y-3 p-4"><Field label="New password"><input type="password" name="password" className="input" minLength={8} required autoComplete="new-password" /></Field><button className="btn-ghost">Change password</button></form></Card>
         <Card title="Policies and handbook" className="lg:col-span-2">{(policies ?? []).length === 0 ? <div className="p-4 text-sm text-muted">No policies published.</div> : <ul className="divide-y divide-line text-sm">{policies!.map((p) => <li key={p.id} className="flex items-start justify-between gap-4 px-4 py-3"><div><div className="font-medium">{p.title} <span className="font-normal text-muted">v{p.version}</span></div><p className="text-muted">{p.body}</p></div>{done.has(p.id) ? <span className="text-xs text-emerald-700">Acknowledged</span> : <form action={ack}><input type="hidden" name="id" value={p.id} /><button className="btn-ghost btn-sm">I have read this</button></form>}</li>)}</ul>}</Card>
       </div>
+      <form action={signOut} className="mt-6"><button className="btn-ghost">Sign out</button></form>
       <p className="mt-6 text-xs text-muted">{PRODUCT.name} · Product owner: {PRODUCT.owner}, {PRODUCT.ownerTitle}</p>
     </Page>
   );
